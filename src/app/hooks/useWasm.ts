@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-
-type Wasm = typeof import('@/wasm/neuro_sketch_gen.js');
+import type { Wasm } from '@/types';
 
 export function useNeuroSketchWasm() {
   const [exports, setExports] = useState<Wasm | null>(null);

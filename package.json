@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "wasm:build": "wasm-pack build wasm/neuro_sketch_gen --target bundler",
-    "predev": "npm run wasm:watch",
+    "predev": "npm run wasm:build",
     "dev": "next dev --turbopack",
     "prebuild": "npm run wasm:build",
     "build": "next build --turbopack",
