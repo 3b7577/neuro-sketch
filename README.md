@@ -1,5 +1,32 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Setup
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (version 18 or higher) - [Download here](https://nodejs.org/)
+- **Rust** (latest stable version) - [Install here](https://rustup.rs/)
+- **wasm-pack** - Install with: `cargo install wasm-pack`
+
+### Installation
+
+1. Clone the repository:
+2. Install Node.js dependencies:
+
+```bash
+npm install
+```
+
+3. Build the WASM module:
+
+```bash
+npm run wasm:build
+```
+
+The WASM build step is automatically run before development and production builds, but you can run it manually if needed.
+
 ## Getting Started
 
 First, run the development server:
