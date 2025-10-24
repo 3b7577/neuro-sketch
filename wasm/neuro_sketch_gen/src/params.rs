@@ -121,10 +121,8 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
         Mode::ColoredNoise => {
             let hue_base = fr(&mut rng, 0.0, 360.0);
             let hue_jitter = fr(&mut rng, 0.0, 60.0);
-            let sat_min = fr(&mut rng, 0.15, 0.75);
-            let sat_max = fr(&mut rng, (sat_min + 0.05).max(0.2), 0.98);
-            let light_min = fr(&mut rng, 0.12, 0.7);
-            let light_max = fr(&mut rng, light_min + 0.05, 0.98);
+            let (sat_min, sat_max) = sample_min_max_with_gap(&mut rng, 0.15, 0.98, 0.05);
+            let (light_min, light_max) = sample_min_max_with_gap(&mut rng, 0.12, 0.98, 0.05);
             let gamma = fr(&mut rng, 0.8, 2.0);
 
             Params::ColoredNoise(ColoredNoiseParams {
@@ -173,8 +171,8 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
             };
 
             let sat = fr(&mut rng, 0.2, 0.95);
-            let light_min = fr(&mut rng, 0.15, 0.9);
-            let light_max = fr(&mut rng, (light_min + 0.05).max(0.2), 0.9);
+
+            let (light_min, light_max) = sample_min_max_with_gap(&mut rng, 0.15, 0.9, 0.05);
 
             let sort_by = {
                 match rng.random_range(0..3) {
@@ -204,12 +202,29 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
     (chosen_mode, params)
 }
 
+#[inline]
 fn fr(rng: &mut Pcg32, low: f32, high: f32) -> f32 {
     debug_assert!(high >= low);
     low + rng.random::<f32>() * (high - low)
 }
 
+#[inline]
 fn ir(rng: &mut Pcg32, low: u32, high: u32) -> u32 {
     debug_assert!(high >= low);
     rng.random_range(low..=high)
+}
+
+#[inline]
+fn sample_min_max_with_gap(rng: &mut Pcg32, low: f32, high: f32, gap: f32) -> (f32, f32) {
+    let low = low.min(high);
+    let high = high.max(low + f32::EPSILON);
+    let gap = gap.clamp(0.0, high - low);
+
+    let min_high = (high - gap).max(low);
+    let min_v = fr(rng, low, min_high);
+
+    let max_low = (min_v + gap).min(high);
+    let max_v = fr(rng, max_low, high);
+
+    (min_v, max_v)
 }
