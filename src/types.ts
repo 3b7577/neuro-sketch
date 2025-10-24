@@ -5,4 +5,5 @@ export enum GenerationMode {
 	COLORED_NOISE = 1,
 	PERLIN_NOISE = 2,
 	PALETTE = 3,
+	HORIZONTAL_PALETTE = 4,
 }

@@ -22,3 +22,24 @@ pub fn gen_palette(data: &mut Vec<u8>, w: u32, h: u32, rng: &mut Pcg32) {
         }
     }
 }
+
+pub fn gen_horizontal_palette(data: &mut Vec<u8>, w: u32, h: u32, rng: &mut Pcg32) {
+    let bars = 6u32;
+
+    for bar in 0..bars {
+        let h_deg = rng.random_range(0.0..360.0);
+        let s = rng.random_range(0.45..0.85);
+        let l = rng.random_range(0.35..0.70);
+        let (r, g, b) = hsl_to_rgb(h_deg, s, l);
+
+        let y0 = (h * bar) / bars;
+        let y1 = (h * (bar + 1)) / bars;
+
+        for y in y0..y1 {
+            for x in 0..w {
+                let i = idx(x, y, w);
+                data[i..i + 4].copy_from_slice(&[r, g, b, 255]);
+            }
+        }
+    }
+}

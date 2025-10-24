@@ -8,7 +8,9 @@ pub use helpers::{hsl_to_rgb, idx};
 
 pub mod stimuli;
 
-use stimuli::{gen_colored_noise, gen_noise, gen_palette, gen_perlin_noise};
+use stimuli::{
+    gen_colored_noise, gen_horizontal_palette, gen_noise, gen_palette, gen_perlin_noise,
+};
 
 #[wasm_bindgen]
 pub fn generate(mode: u32, seed: u32, width: u32, height: u32) -> Clamped<Vec<u8>> {
@@ -19,6 +21,7 @@ pub fn generate(mode: u32, seed: u32, width: u32, height: u32) -> Clamped<Vec<u8
         1 => gen_colored_noise(&mut data, width, height, &mut rng),
         2 => gen_perlin_noise(&mut data, width, height, &mut rng),
         3 => gen_palette(&mut data, width, height, &mut rng),
+        4 => gen_horizontal_palette(&mut data, width, height, &mut rng),
         _ => gen_noise(&mut data, width, height, &mut rng),
     }
 

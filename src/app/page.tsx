@@ -12,6 +12,7 @@ const ColorLabel: Record<GenerationMode, string> = {
 	[GenerationMode.COLORED_NOISE]: "colored noise",
 	[GenerationMode.PERLIN_NOISE]: "perlin noise",
 	[GenerationMode.PALETTE]: "palette",
+	[GenerationMode.HORIZONTAL_PALETTE]: "horizontal palette",
 };
 
 export default function Home() {
