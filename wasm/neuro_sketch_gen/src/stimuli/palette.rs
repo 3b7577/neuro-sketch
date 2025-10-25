@@ -35,7 +35,13 @@ fn paint_vertical_bar(data: &mut [u8], w: u32, h: u32, x0: u32, x1: u32, rgba: [
     }
 }
 
-pub fn gen_palette(data: &mut Vec<u8>, w: u32, h: u32, rng: &mut Pcg32, params: &PaletteParams) {
+pub fn gen_palette(
+    data: &mut Vec<u8>,
+    width: u32,
+    height: u32,
+    rng: &mut Pcg32,
+    params: &PaletteParams,
+) {
     let &PaletteParams {
         swatches,
         hue_base,
@@ -47,21 +53,25 @@ pub fn gen_palette(data: &mut Vec<u8>, w: u32, h: u32, rng: &mut Pcg32, params: 
 
     let anchors = scheme_hues(hue_base, scheme);
 
-    let cols: Vec<Hsl> = (0..swatches)
-        .map(|i| {
-            let a = anchors[(i as usize) % anchors.len()];
-            let h = wrap_deg(a + rng.random_range(-8.0..8.0));
-            let s = (sat + rng.random_range(-0.05..0.05)).clamp(0.0, 1.0);
-            let l = rng.random_range(light_min..light_max);
+    for i in 0..swatches {
+        let a = anchors[(i as usize) % anchors.len()];
+        let h = wrap_deg(a + rng.random_range(-8.0..8.0));
+        let s = (sat + rng.random_range(-0.05..0.05)).clamp(0.0, 1.0);
+        let l = rng.random_range(light_min..light_max);
 
-            Hsl::new(h, s, l)
-        })
-        .collect();
+        let hsl = Hsl::new(h, s, l);
 
-    for (i, c) in cols.iter().enumerate() {
-        let rgb: Srgb<u8> = Srgb::from_color(*c).into_format();
-        let x0 = (w * i as u32) / swatches;
-        let x1 = (w * (i as u32 + 1)) / swatches;
-        paint_vertical_bar(data, w, h, x0, x1, [rgb.red, rgb.green, rgb.blue, 255]);
+        let rgb: Srgb<u8> = Srgb::from_color(hsl).into_format();
+        let x0 = (width * i as u32) / swatches;
+        let x1 = (width * (i as u32 + 1)) / swatches;
+
+        paint_vertical_bar(
+            data,
+            width,
+            height,
+            x0,
+            x1,
+            [rgb.red, rgb.green, rgb.blue, 255],
+        );
     }
 }
