@@ -27,7 +27,9 @@ pub fn generate(mode: u32, seed: u32, width: u32, height: u32) -> Clamped<Vec<u8
         Params::ColoredNoise(colored_noise_params) => {
             gen_colored_noise(&mut data, width, height, &mut rng, &colored_noise_params)
         }
-        Params::Perlin(_perlin_params) => gen_perlin_noise(&mut data, width, height, &mut rng),
+        Params::Perlin(perlin_params) => {
+            gen_perlin_noise(&mut data, width, height, &mut rng, &perlin_params)
+        }
         Params::Palette(_palette_params) => gen_palette(&mut data, width, height, &mut rng),
         Params::HorizontalPalette(_horizontal_palette_params) => {
             gen_horizontal_palette(&mut data, width, height, &mut rng)
