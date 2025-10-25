@@ -24,6 +24,13 @@ impl core::convert::TryFrom<u32> for Mode {
     }
 }
 
+const MODE_WEIGHTS: &[(Mode, u32)] = &[
+    (Mode::Noise, 20),
+    (Mode::ColoredNoise, 30),
+    (Mode::Perlin, 25),
+    (Mode::Palette, 25),
+];
+
 #[derive(Clone, Debug, Copy)]
 pub enum ColorScheme {
     Mono,
@@ -78,23 +85,23 @@ pub struct PaletteParams {
     pub light_max: f32, // 0.2..0.97
 }
 
-pub fn params_from_rng(rng: &mut Pcg32, mode: Option<Mode>) -> (Mode, Params) {
-    let chosen_mode = match mode {
-        Some(m) => m,
-        None => {
-            let pick = rng.random_range(0..100);
+#[inline]
+fn pick_mode_weighted(rng: &mut Pcg32) -> Mode {
+    let total_weight: u32 = MODE_WEIGHTS.iter().map(|(_, w)| w).sum();
+    let mut pick = rng.random_range(0..total_weight);
 
-            if pick < 20 {
-                Mode::Noise
-            } else if pick < 50 {
-                Mode::ColoredNoise
-            } else if pick < 75 {
-                Mode::Perlin
-            } else {
-                Mode::Palette
-            }
+    for &(mode, weight) in MODE_WEIGHTS {
+        if pick < weight {
+            return mode;
         }
-    };
+        pick -= weight;
+    }
+
+    MODE_WEIGHTS[0].0
+}
+
+pub fn params_from_rng(rng: &mut Pcg32, mode: Option<Mode>) -> (Mode, Params) {
+    let chosen_mode = mode.unwrap_or_else(|| pick_mode_weighted(rng));
 
     let params = match chosen_mode {
         Mode::Noise => {
