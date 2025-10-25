@@ -2,6 +2,7 @@
 use rand::Rng;
 use rand_pcg::Pcg32;
 
+#[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Mode {
     Noise = 0,
@@ -10,13 +11,15 @@ pub enum Mode {
     Palette = 3,
 }
 
-impl Mode {
-    pub fn from_u32(v: u32) -> Mode {
-        match v {
-            1 => Mode::ColoredNoise,
-            2 => Mode::Perlin,
-            3 => Mode::Palette,
-            _ => Mode::Noise,
+impl core::convert::TryFrom<u32> for Mode {
+    type Error = ();
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Mode::Noise),
+            1 => Ok(Mode::ColoredNoise),
+            2 => Ok(Mode::Perlin),
+            3 => Ok(Mode::Palette),
+            _ => Err(()),
         }
     }
 }

@@ -24,7 +24,7 @@ fn spawn_rngs(seed: u64) -> (Pcg32, Pcg32) {
 pub fn generate(mode: u32, seed: u32, width: u32, height: u32) -> Clamped<Vec<u8>> {
     let (mut rng_params, mut rng_pixels) = spawn_rngs(seed as u64);
     let mut data = vec![0u8; (width * height * 4) as usize];
-    let requested_mode = Some(Mode::from_u32(mode));
+    let requested_mode = Mode::try_from(mode).ok();
     let (_chosen_mode, params) = params_from_rng(&mut rng_params, requested_mode);
 
     match params {
