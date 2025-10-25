@@ -57,7 +57,8 @@ pub fn gen_palette(
         let a = anchors[(i as usize) % anchors.len()];
         let h = wrap_deg(a + rng.random_range(-8.0..8.0));
         let s = (sat + rng.random_range(-0.05..0.05)).clamp(0.0, 1.0);
-        let l = rng.random_range(light_min..light_max);
+        let l = (rng.random_range(light_min..light_max) + rng.random_range(-0.01..0.01))
+            .clamp(0.0, 1.0);
 
         let hsl = Hsl::new(h, s, l);
 
