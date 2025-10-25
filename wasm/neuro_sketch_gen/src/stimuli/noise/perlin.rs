@@ -2,7 +2,7 @@ use noise::{NoiseFn, Perlin};
 use rand::Rng;
 use rand_pcg::Pcg32;
 
-use crate::{idx, params::PerlinParams};
+use crate::{helpers::idx, params::PerlinParams};
 
 #[inline]
 // S-curve

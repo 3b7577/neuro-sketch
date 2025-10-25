@@ -1,8 +1,9 @@
 use crate::{
     helpers::idx,
-    hsl_to_rgb,
     params::{ColoredNoiseParams, NoiseParams},
 };
+use palette::FromColor;
+use palette::{Hsl, Srgb};
 use rand::Rng;
 use rand_pcg::Pcg32;
 
@@ -43,14 +44,14 @@ pub fn gen_colored_noise(
     for y in 0..h {
         for x in 0..w {
             let hue = (hue_base + rng.random_range(-hue_jitter..hue_jitter)).rem_euclid(360.0);
-
             let sat = rng.random_range(sat_min..sat_max);
             let light = (rng.random_range(light_min..light_max)).powf(1.0 / gamma);
 
-            let (r, g, b) = hsl_to_rgb(hue, sat, light);
+            let hsl = Hsl::new(hue, sat, light);
+            let rgb: Srgb<u8> = Srgb::from_color(hsl).into_format();
 
             let i = idx(x, y, w);
-            data[i..i + 4].copy_from_slice(&[r, g, b, 255]);
+            data[i..i + 4].copy_from_slice(&[rgb.red, rgb.green, rgb.blue, 255]);
         }
     }
 }

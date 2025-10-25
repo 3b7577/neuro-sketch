@@ -1,5 +1,5 @@
-// create params that depends on seed for generating images with more exclusive features
-use rand::{Rng, SeedableRng};
+// creates params that depends on seed for generating images with more exclusive features
+use rand::Rng;
 use rand_pcg::Pcg32;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -8,7 +8,6 @@ pub enum Mode {
     ColoredNoise = 1,
     Perlin = 2,
     Palette = 3,
-    HorizontalPalette = 4,
 }
 
 impl Mode {
@@ -17,13 +16,12 @@ impl Mode {
             1 => Mode::ColoredNoise,
             2 => Mode::Perlin,
             3 => Mode::Palette,
-            4 => Mode::HorizontalPalette,
             _ => Mode::Noise,
         }
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub enum ColorScheme {
     Mono,
     Analogous,
@@ -32,19 +30,11 @@ pub enum ColorScheme {
 }
 
 #[derive(Clone, Debug)]
-pub enum SortBy {
-    Hue,
-    Lightness,
-    Saturation,
-}
-
-#[derive(Clone, Debug)]
 pub enum Params {
     Noise(NoiseParams),
     ColoredNoise(ColoredNoiseParams),
     Perlin(PerlinParams),
     Palette(PaletteParams),
-    HorizontalPalette(PaletteParams),
 }
 
 #[derive(Clone, Debug)]
@@ -83,27 +73,22 @@ pub struct PaletteParams {
     pub sat: f32,       // 0.2..0.95
     pub light_min: f32, // 0.15..0.9
     pub light_max: f32, // 0.2..0.97
-    pub sort_by: SortBy,
 }
 
-pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
-    let mut rng = Pcg32::seed_from_u64(seed);
-
+pub fn params_from_rng(rng: &mut Pcg32, mode: Option<Mode>) -> (Mode, Params) {
     let chosen_mode = match mode {
         Some(m) => m,
         None => {
             let pick = rng.random_range(0..100);
 
-            if pick < 15 {
+            if pick < 20 {
                 Mode::Noise
-            } else if pick < 35 {
+            } else if pick < 50 {
                 Mode::ColoredNoise
-            } else if pick < 65 {
+            } else if pick < 75 {
                 Mode::Perlin
-            } else if pick < 85 {
-                Mode::Palette
             } else {
-                Mode::HorizontalPalette
+                Mode::Palette
             }
         }
     };
@@ -111,19 +96,19 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
     let params = match chosen_mode {
         Mode::Noise => {
             let p = NoiseParams {
-                dither: fr(&mut rng, 0.0, 1.0),
-                gamma: fr(&mut rng, 0.7, 2.2),
+                dither: fr(rng, 0.0, 1.0),
+                gamma: fr(rng, 0.7, 2.2),
             };
 
             Params::Noise(p)
         }
 
         Mode::ColoredNoise => {
-            let hue_base = fr(&mut rng, 0.0, 360.0);
-            let hue_jitter = fr(&mut rng, 0.0, 60.0);
-            let (sat_min, sat_max) = sample_min_max_with_gap(&mut rng, 0.15, 0.98, 0.05);
-            let (light_min, light_max) = sample_min_max_with_gap(&mut rng, 0.12, 0.98, 0.05);
-            let gamma = fr(&mut rng, 0.8, 2.0);
+            let hue_base = fr(rng, 0.0, 360.0);
+            let hue_jitter = fr(rng, 0.0, 60.0);
+            let (sat_min, sat_max) = sample_min_max_with_gap(rng, 0.15, 0.98, 0.05);
+            let (light_min, light_max) = sample_min_max_with_gap(rng, 0.12, 0.98, 0.05);
+            let gamma = fr(rng, 0.8, 2.0);
 
             Params::ColoredNoise(ColoredNoiseParams {
                 hue_base,
@@ -137,15 +122,15 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
         }
 
         Mode::Perlin => {
-            let scale = fr(&mut rng, 0.004, 0.05) as f64;
-            let octaves = ir(&mut rng, 1, 6) as u8;
-            let persistence = fr(&mut rng, 0.3, 0.9);
-            let lacunarity = fr(&mut rng, 1.8, 2.6);
-            let contrast = fr(&mut rng, 0.0, 1.0);
+            let scale = fr(rng, 0.004, 0.05) as f64;
+            let octaves = ir(rng, 1, 6) as u8;
+            let persistence = fr(rng, 0.3, 0.9);
+            let lacunarity = fr(rng, 1.8, 2.6);
+            let contrast = fr(rng, 0.0, 1.0);
             let tint = (
-                ir(&mut rng, 200, 255) as u8,
-                ir(&mut rng, 200, 255) as u8,
-                ir(&mut rng, 200, 255) as u8,
+                ir(rng, 200, 255) as u8,
+                ir(rng, 200, 255) as u8,
+                ir(rng, 200, 255) as u8,
             );
 
             Params::Perlin(PerlinParams {
@@ -158,9 +143,9 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
             })
         }
 
-        Mode::Palette | Mode::HorizontalPalette => {
-            let swatches = ir(&mut rng, 3, 12);
-            let hue_base = fr(&mut rng, 0.0, 360.0);
+        Mode::Palette => {
+            let swatches = ir(rng, 3, 12);
+            let hue_base = fr(rng, 0.0, 360.0);
             let scheme = {
                 match rng.random_range(0..4) {
                     0 => ColorScheme::Mono,
@@ -170,17 +155,9 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
                 }
             };
 
-            let sat = fr(&mut rng, 0.2, 0.95);
+            let sat = fr(rng, 0.2, 0.95);
 
-            let (light_min, light_max) = sample_min_max_with_gap(&mut rng, 0.15, 0.9, 0.05);
-
-            let sort_by = {
-                match rng.random_range(0..3) {
-                    0 => SortBy::Hue,
-                    1 => SortBy::Lightness,
-                    _ => SortBy::Saturation,
-                }
-            };
+            let (light_min, light_max) = sample_min_max_with_gap(rng, 0.15, 0.9, 0.05);
 
             let p = PaletteParams {
                 swatches,
@@ -189,13 +166,8 @@ pub fn params_from_seed(seed: u64, mode: Option<Mode>) -> (Mode, Params) {
                 sat,
                 light_min,
                 light_max,
-                sort_by,
             };
-            if chosen_mode == Mode::Palette {
-                Params::Palette(p)
-            } else {
-                Params::HorizontalPalette(p)
-            }
+            Params::Palette(p)
         }
     };
 
