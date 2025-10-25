@@ -60,7 +60,7 @@ pub struct ColoredNoiseParams {
 
 #[derive(Clone, Debug)]
 pub struct PerlinParams {
-    pub scale: f64,         // 0.004..0.05 "noise" crate expects f64
+    pub scale: f32,         // 0.004..0.05 "noise" crate expects f64
     pub octaves: u8,        // 1..6
     pub persistence: f32,   // 0.3..0.9
     pub lacunarity: f32,    // 1.8..2.6
@@ -125,7 +125,7 @@ pub fn params_from_rng(rng: &mut Pcg32, mode: Option<Mode>) -> (Mode, Params) {
         }
 
         Mode::Perlin => {
-            let scale = fr(rng, 0.004, 0.05) as f64;
+            let scale = fr(rng, 0.004, 0.05);
             let octaves = ir(rng, 1, 6) as u8;
             let persistence = fr(rng, 0.3, 0.9);
             let lacunarity = fr(rng, 1.8, 2.6);

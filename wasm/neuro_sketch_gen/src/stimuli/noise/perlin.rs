@@ -52,8 +52,8 @@ pub fn gen_perlin_noise(
 
     for y in 0..h {
         for x in 0..w {
-            let nx = x as f64 * scale;
-            let ny = y as f64 * scale;
+            let nx = x as f64 * scale as f64;
+            let ny = y as f64 * scale as f64;
 
             let mut value = 0.0;
             let mut amp = 1.0;
