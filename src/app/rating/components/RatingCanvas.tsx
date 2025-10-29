@@ -37,7 +37,7 @@ const RatingCanvas = () => {
   }
 
   return (
-    <div className="flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-6">
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}

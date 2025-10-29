@@ -41,3 +41,5 @@ wasm/neuro_sketch_gen/target
 wasm/neuro_sketch_gen/pkg
 
 /docs
+
+.cursor/rules

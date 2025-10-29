@@ -50,7 +50,7 @@ const RatingSidebar: FC<RatingSidebarProps> = ({
   };
 
   return (
-    <Sidebar className={`w-80 ${className}`}>
+    <Sidebar className={`w-[272px] ${className}`}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <Select
@@ -75,7 +75,7 @@ const RatingSidebar: FC<RatingSidebarProps> = ({
                 />
                 <button
                   onClick={handleRandomizeSeed}
-                  className="btn-primary px-4 py-2 text-sm"
+                  className="btn-primary"
                   type="button"
                 >
                   Random
